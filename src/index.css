@@ -1,0 +1,40 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* PayHero Button Custom Styles */
+.payhero-container .payhero-button,
+.payhero-container button {
+  width: 100% !important;
+  border-radius: 25px !important;
+  padding: 16px 24px !important;
+  font-size: 18px !important;
+  font-weight: 600 !important;
+  text-align: center !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-height: 56px !important;
+  transition: all 0.3s ease !important;
+}
+
+.payhero-container .payhero-button:hover,
+.payhero-container button:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15) !important;
+}
+
+@keyframes slide-down {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -100%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+.animate-slide-down {
+  animation: slide-down 0.3s ease-out;
+}

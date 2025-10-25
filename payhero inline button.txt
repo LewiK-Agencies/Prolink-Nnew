@@ -1,0 +1,222 @@
+# Payment Button
+
+### Overview
+
+The **Pay Hero Payment Button Widget** allows merchants and developers to easily integrate a payment button into their websites or applications. The widget provides a seamless way for customers to make payments through Pay Hero without leaving the merchant's site.
+
+### Features
+
+* **Easy Integration**: Just include the JavaScript SDK and configure a few parameters.
+* **Customizable Button**: Set button text, color, and dimensions.
+* **Event Handling**: Listen for successful or failed payments using JavaScript event listeners.
+* **Redirection Support**: Define success and failure URLs for post-payment actions.
+* **Callback URL Support**: Receive a payment payload for backend processing.
+
+### Installation
+
+Include the Pay Hero Button SDK in your HTML file:
+
+```html
+<script src="https://applet.payherokenya.com/cdn/button_sdk.js?v=3.1"></script>
+```
+
+### Usage
+
+To use the widget, insert the following code into your HTML page:
+
+```html
+<!-- PayHero Payment Container -->
+<div id="payHero"></div>
+
+<script>
+    PayHero.init({
+        paymentUrl: "https://app.payhero.co.ke/lipwa/2003", //REQUIRED: 
+        width: "100%",
+        height: "100%",
+        containerId: "payHero",
+        channelID: 3429, //REQUIRED: 
+        amount: 1, //REQUIRED: provide the amount
+        phone: "{customer mpesa number}", //required: provide the customer phone,
+        name: "{customer name}", //OPTIONAL: Customer name
+        reference: "CV payments", //required: provide payment reference here
+        buttonName: "Pay Now KES {amount}", //REQUIRED: provide button text
+        buttonColor: "#00a884", //REQUIRED: provide button color- use colour in the theme of the client
+        successUrl: 'https://stage.kaylielabs.store/?payment=success{checkout id }', //required: url user will be redirected after successful payment
+        failedUrl: 'https://stage.kaylielabs.store', //required: url user will be redirected after failed payment
+        callbackUrl: null //not needed as we don`t have a server : URL where the payment payload will be sent to on success,
+    });
+
+    // Handling payment success or failure
+    window.addEventListener('message', function(event) {
+        if (event.data.paymentSuccess) {
+            console.log("Payment Successful:", event.data);
+            alert('Payment successful!');
+        } else {
+            alert('Oopsie! Payment failed');
+        }
+    });
+</script>
+```
+
+### Parameters
+
+| Parameter     | Required | Description                                                        |
+| ------------- | -------- | ------------------------------------------------------------------ |
+| `paymentUrl`  | Yes      | Your Pay Hero Lipwa payment link.                                  |
+| `width`       | No       | Width of the button (default: 100%).                               |
+| `height`      | No       | Height of the button (default: 100%).                              |
+| `containerId` | Yes      | The HTML element ID where the button will be injected.             |
+| `channelID`   | Yes      | Your unique payment channel ID.                                    |
+| `amount`      | Yes      | The amount to be paid.                                             |
+| `phone`       | Yes       | Customer's phone number (optional).                                |
+| `name`        | No       | Customer's name (optional).                                        |
+| `reference`   | Yes       | A unique reference for tracking payments.                          |
+| `buttonName`  | Yes      | The text displayed on the payment button.                          |
+| `buttonColor` | Yes      | The color of the payment button.                                   |
+| `successUrl`  | Yes       | URL to redirect the user upon a successful payment.                |
+| `failedUrl`   | Yes       | URL to redirect the user if the payment fails.                     |
+| `callbackUrl` | No       | Webhook URL where Pay Hero sends the payment details upon success. |
+
+### Handling Payment Events
+
+To listen for payment success or failure, use the following JavaScript event listener:
+
+```javascript
+window.addEventListener('message', function(event) {
+    if (event.data.paymentSuccess) {
+        console.log("Payment Details:", event.data);
+    } else {
+        console.error("Payment failed");
+    }
+});
+```
+
+### Use Cases
+
+1. **E-commerce Websites**: Enable customers to make instant payments for products or services.
+2. **Service Providers**: Freelancers or businesses can embed the button for easy payment collection.
+3. **Event Ticketing**: Sell event tickets online with a seamless checkout experience.
+4. **Donations**: Non-profits can collect donations with a single click.
+5. **Subscription Payments**: Collect recurring or one-time subscription fees from users.
+
+### Conclusion
+
+The **Pay Hero Payment Button Widget** simplifies payment processing, making it easier for businesses and individuals to collect payments securely. With a few lines of code, you can integrate a fully functional payment button into your website.
+
+### Success Callback URL Payload
+
+This is the payload that will be sent to the provided callback URL via POST.
+
+```json
+{
+  "paymentSuccess": true,
+  "reference": "c632-4e27-9718-f9fcdec511d826234",
+  "user_reference": "buttonTesting",
+  "provider": "m-pesa",
+  "providerReference": "TCT3K99UFZ",
+  "amount": 1,
+  "phone": "0708344101",
+  "customerName": "Good Samaritan",
+  "channel": "100"
+}
+```
+
+### DEMO
+
+[**https://applet.payherokenya.com/deposit/button.html**](https://applet.payherokenya.com/deposit/button.html)
+
+
+##example of the inline button 
+
+<!DOCTYPE html>
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Payment Button Demo</title>
+<script src="./Payment Button Demo_files/button_sdk.js.download"></script>
+<style>
+    /* Basic styles for the payment details */
+    .payment-details {
+        margin-top: 20px;
+        padding: 10px;
+        border: 1px solid #ccc;
+        background-color: #f9f9f9;
+    }
+    .payment-details h2 {
+        margin-top: 0;
+    }
+    .payment-details p {
+        margin: 5px 0;
+    }
+</style>
+<style id="payhero-styles" type="text/css"><br>          .payhero-button {<br>            background-color: #00a884;<br>            color: #fff;<br>            padding: 12px 24px;<br>            font-size: 16px;<br>            font-weight: 600;<br>            border: none;<br>            border-radius: 6px;<br>            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);<br>            cursor: pointer;<br>            display: flex;<br>            align-items: center;<br>            justify-content: center;<br>            transition: all 0.2s ease;<br>            outline: none;<br>          }<br>          <br>          .payhero-button:hover {<br>            filter: brightness(1.05);<br>            transform: translateY(-1px);<br>            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);<br>          }<br>          <br>          .payhero-button:active {<br>            transform: translateY(0);<br>            filter: brightness(0.95);<br>            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);<br>          }<br>          <br>          .payhero-modal {<br>            display: none;<br>            position: fixed;<br>            z-index: 9999;<br>            left: 0;<br>            top: 0;<br>            width: 100%;<br>            height: 100%;<br>            overflow: hidden;<br>            background-color: rgba(0, 0, 0, 0.7);<br>            animation: payheroFadeIn 0.3s ease;<br>            backdrop-filter: blur(3px);<br>          }<br>          <br>          .payhero-modal-content {<br>            background-color: #fff;<br>            margin: 2vh auto;<br>            padding: 0;<br>            border-radius: 12px;<br>            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);<br>            overflow: hidden;<br>            max-width: 1200px;<br>            max-height: 90%;<br>            animation: payheroSlideIn 0.3s ease;<br>            display: flex;<br>            flex-direction: column;<br>          }<br>          <br>          .payhero-modal-header {<br>            display: flex;<br>            justify-content: space-between;<br>            align-items: center;<br>            padding: 16px 20px;<br>            background-color: #f8f9fa;<br>            border-bottom: 1px solid #eaeaea;<br>          }<br>          <br>          .payhero-modal-title {<br>            margin: 0;<br>            font-size: 18px;<br>            color: #333;<br>            font-weight: 600;<br>          }<br>          <br>          .payhero-close-button {<br>            background: none;<br>            border: none;<br>            font-size: 24px;<br>            line-height: 1;<br>            color: #999;<br>            cursor: pointer;<br>            padding: 0 8px;<br>            transition: color 0.2s;<br>          }<br>          <br>          .payhero-close-button:hover {<br>            color: #333;<br>          }<br>          <br>          .payhero-iframe-wrapper {<br>            flex: 1;<br>            width: 100%;<br>            height: calc(100% - 53px);<br>            overflow: hidden;<br>          }<br>          <br>          #paymentFrame {<br>            width: 100%;<br>            height: 100%;<br>            border: none;<br>            display: none;<br>          }<br>          <br>          .payhero-spinner {<br>            display: flex;<br>            justify-content: center;<br>            align-items: center;<br>            height: calc(100% - 53px);<br>            flex-shrink: 0;<br>          }<br>          <br>          .payhero-spinner-dot {<br>            width: 12px;<br>            height: 12px;<br>            margin: 0 4px;<br>            background-color: #00a884;<br>            border-radius: 50%;<br>            display: inline-block;<br>            animation: payheroBounceDot 1.4s infinite ease-in-out both;<br>          }<br>          <br>          .payhero-spinner-dot:nth-child(1) {<br>            animation-delay: -0.32s;<br>          }<br>          <br>          .payhero-spinner-dot:nth-child(2) {<br>            animation-delay: -0.16s;<br>          }<br>          <br>          @keyframes payheroBounceDot {<br>            0%, 80%, 100% { <br>              transform: scale(0);<br>            } 40% { <br>              transform: scale(1.0);<br>            }<br>          }<br>          <br>          @keyframes payheroFadeIn {<br>            from { opacity: 0; }<br>            to { opacity: 1; }<br>          }<br>          <br>          @keyframes payheroSlideIn {<br>            from { transform: translateY(-20px); opacity: 0; }<br>            to { transform: translateY(0); opacity: 1; }<br>          }<br>          <br>          @media (max-width: 768px) {<br>            .payhero-modal-content {<br>              width: 95% !important;<br>              height: 85% !important;<br>              margin: 5vh auto;<br>            }<br>          }<br>        </style></head>
+<body style="overflow: auto;">
+<h1>Pay Hero Payment Button Demo</h1>
+<!-- PayHero Payment Container -->
+<div id="payHero"><button id="paymentButton" class="payhero-button">Pay Now KES 10</button></div>
+<!-- Container to display payment details -->
+<div id="paymentDetails" class="payment-details" style="display: none;">
+    <h2>Payment Success!</h2>
+    <p><strong>Amount:</strong> <span id="amount"></span></p>
+    <p><strong>Channel:</strong> <span id="channel"></span></p>
+    <p><strong>Customer Name:</strong> <span id="customerName"></span></p>
+    <p><strong>Phone:</strong> <span id="phone"></span></p>
+    <p><strong>Provider:</strong> <span id="provider"></span></p>
+    <p><strong>Provider Reference:</strong> <span id="providerReference"></span></p>
+    <p><strong>Reference:</strong> <span id="reference"></span></p>
+    <p><strong>User Reference:</strong> <span id="userReference"></span></p>
+</div>
+<script>
+    PayHero.init({
+        paymentUrl: "https://app.payhero.co.ke/lipwa/2003", //REQUIRED: 
+        width: "100%",
+        height: "100%",
+        containerId: "payHero",
+        channelID: 3429, //REQUIRED: 
+        amount: 1, //REQUIRED: provide the amount
+        phone: "{customer mpesa number}", //required: provide the customer phone,
+        name: "{customer name}", //OPTIONAL: Customer name
+        reference: "CV payments", //required: provide payment reference here
+        buttonName: "Pay Now KES {amount}", //REQUIRED: provide button text
+        buttonColor: "#00a884", //REQUIRED: provide button color- use colour in the theme of the client
+        successUrl: 'https://stage.kaylielabs.store/?payment=success{checkout id }', //required: url user will be redirected after successful payment
+        failedUrl: 'https://stage.kaylielabs.store', //required: url user will be redirected after failed payment
+        callbackUrl: null //not needed as we don`t have a server : URL where the payment payload will be sent to on success,
+    });
+    
+    //listen to payment changes 
+
+    window.addEventListener('message', function(event) {
+        if (event.data.paymentSuccess) {
+            //Payload
+            const amount = event.data.amount;
+            const channel = event.data.channel;
+            const customerName = event.data.customerName;
+            const phone = event.data.phone;
+            const provider = event.data.provider;
+            const providerReference = event.data.providerReference;
+            const reference = event.data.reference;
+            const user_reference = event.data.user_reference;
+
+            // Render the data on the UI
+            document.getElementById('amount').textContent = amount;
+            document.getElementById('channel').textContent = channel;
+            document.getElementById('customerName').textContent = customerName;
+            document.getElementById('phone').textContent = phone;
+            document.getElementById('provider').textContent = provider;
+            document.getElementById('providerReference').textContent = providerReference;
+            document.getElementById('reference').textContent = reference;
+            document.getElementById('userReference').textContent = user_reference;
+
+            // Show the payment details container
+            document.getElementById('paymentDetails').style.display = 'block';
+        } else {
+            // Do whatever action you need here, now that payment not successful.
+            alert('Oopsie! Payment failed');
+        }
+    });
+</script><div id="paymentModal" class="payhero-modal" style="display: none;"><div class="payhero-modal-content" style="width: 80%; height: 70%;"><div class="payhero-modal-header"><h3 class="payhero-modal-title">Secure Payment</h3><button class="payhero-close-button" aria-label="Close payment form">×</button></div><div class="payhero-spinner" id="paymentSpinner" style="display: none;"><div class="payhero-spinner-dot"></div><div class="payhero-spinner-dot"></div><div class="payhero-spinner-dot"></div></div><div class="payhero-iframe-wrapper"><iframe id="paymentFrame" title="Payment Form" sandbox="allow-forms allow-scripts allow-same-origin allow-top-navigation allow-popups" src="./Payment Button Demo_files/saved_resource.html" style="display: block;"></iframe></div></div></div>
+<script defer="" src="./Payment Button Demo_files/vcd15cbe7772f49c399c6a5babf22c1241717689176015" integrity="sha512-ZpsOmlRQV6y907TI0dKBHq9Md29nnaEIPlkf84rnaERnq6zvWvPUqr2ft8M1aS28oN72PdrCzSjY4U6VaAw1EQ==" data-cf-beacon="{&quot;rayId&quot;:&quot;945cd7f17b304ec2&quot;,&quot;version&quot;:&quot;2025.4.0-1-g37f21b1&quot;,&quot;r&quot;:1,&quot;token&quot;:&quot;acb1df93d6a541d4b4a3f519d5a745f7&quot;,&quot;serverTiming&quot;:{&quot;name&quot;:{&quot;cfExtPri&quot;:true,&quot;cfL4&quot;:true,&quot;cfSpeedBrain&quot;:true,&quot;cfCacheStatus&quot;:true}}}" crossorigin="anonymous"></script>
+
+</body></html>
+
+
