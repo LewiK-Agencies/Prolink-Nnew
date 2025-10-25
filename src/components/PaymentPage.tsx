@@ -33,13 +33,13 @@ const PaymentPage: React.FC<PaymentPageProps> = ({ onBack }) => {
         
         
         const amount = 1; // 1 KES for resume templates
-        const DOMAIN = 'http://localhost:4173';
+        const DOMAIN = 'https://prolink.cv';
         const config = {
-          paymentUrl: "https://app.payhero.co.ke/lipwa/2003",
+          paymentUrl: "https://app.payhero.co.ke/lipwa/1898",
           width: "100%",
           height: "100%",
           containerId: "payHero",
-          channelID: 3429,
+          channelID: 2220,
           amount: amount,
           phone: "", // Leave blank so user can enter their M-Pesa number
           name: data ? JSON.parse(data).personalInfo?.fullName || "Customer" : "Customer",
