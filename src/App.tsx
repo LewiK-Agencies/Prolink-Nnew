@@ -4,7 +4,7 @@ import ResumeForm from './components/ResumeForm';
 import PreviewPage from './components/PreviewPage';
 import PaymentPage from './components/PaymentPage';
 import DownloadPage from './components/DownloadPage';
-import { hasCompletedPayment, setPaymentCompleted, getCheckoutToken, getCheckoutState } from './utils/storage';
+import { hasCompletedPayment, setPaymentCompleted, getCheckoutToken, loadResumeData, loadCustomization } from './utils/storage';
 
 type AppPage = 'home' | 'form' | 'preview' | 'payment' | 'download';
 
@@ -18,17 +18,32 @@ function App() {
     const token = urlParams.get('token');
 
     if (paymentStatus === 'success' && token) {
-      // Validate our token and checkout state
+      // Validate token and check if resume data exists
       const storedToken = getCheckoutToken();
-      const checkoutState = getCheckoutState();
+      const resumeData = loadResumeData();
+      const customization = loadCustomization();
 
-      if (storedToken === token && checkoutState === 'completed') {
-        // Valid payment - set completed and go to download
+      console.log('Payment validation:', {
+        tokenMatch: storedToken === token,
+        hasResumeData: !!resumeData,
+        hasCustomization: !!customization
+      });
+
+      if (storedToken === token && resumeData && customization) {
+        // Valid payment with data - set completed and go to download
+        console.log('Payment validated successfully, redirecting to download page');
         setPaymentCompleted();
         setCurrentPage('download');
         window.history.replaceState({}, '', window.location.pathname);
+      } else if (storedToken === token && (!resumeData || !customization)) {
+        // Valid token but missing data
+        console.error('Payment successful but resume data is missing');
+        setPaymentError('Payment successful but resume data is missing. Please create your resume again.');
+        setCurrentPage('form');
+        window.history.replaceState({}, '', window.location.pathname);
       } else {
-        // Invalid payment - show error on home page
+        // Invalid token
+        console.error('Invalid payment token');
         setPaymentError('Invalid payment parameters. Please try again.');
         setCurrentPage('home');
         window.history.replaceState({}, '', window.location.pathname);

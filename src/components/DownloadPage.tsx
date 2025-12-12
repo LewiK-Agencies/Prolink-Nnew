@@ -18,15 +18,39 @@ const DownloadPage: React.FC<DownloadPageProps> = ({ onHome }) => {
   const [downloadingTemplate, setDownloadingTemplate] = useState<string | null>(null);
   const [downloadedTemplates, setDownloadedTemplates] = useState<Set<string>>(new Set());
   const [showNotification, setShowNotification] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const WHATSAPP_LINK = 'https://wa.me/+254706625195';
 
   useEffect(() => {
+    console.log('DownloadPage: Loading resume data from localStorage');
     const data = loadResumeData();
     const savedCustomization = loadCustomization();
-    if (data) setResumeData(data);
-    if (savedCustomization) setCustomization(savedCustomization);
-  }, []);
+
+    console.log('DownloadPage: Data check', {
+      hasResumeData: !!data,
+      hasCustomization: !!savedCustomization,
+      resumeDataKeys: data ? Object.keys(data) : [],
+      customizationKeys: savedCustomization ? Object.keys(savedCustomization) : []
+    });
+
+    if (!data || !savedCustomization) {
+      console.error('DownloadPage: Missing data!', {
+        resumeData: !!data,
+        customization: !!savedCustomization
+      });
+      setError('Resume data not found. Please create your resume first.');
+      // Auto-redirect to home after 3 seconds
+      setTimeout(() => {
+        console.log('DownloadPage: Auto-redirecting to home due to missing data');
+        onHome();
+      }, 3000);
+    } else {
+      console.log('DownloadPage: Data loaded successfully');
+      setResumeData(data);
+      setCustomization(savedCustomization);
+    }
+  }, [onHome]);
 
   const handleDownload = async (templateId: string, templateName: string) => {
     if (!resumeData || !customization) return;
@@ -104,6 +128,27 @@ const DownloadPage: React.FC<DownloadPageProps> = ({ onHome }) => {
     { id: 'minimal', name: 'Minimal', component: MinimalTemplate }
   ];
 
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-gray-100 flex items-center justify-center p-4">
+        <div className="bg-white rounded-xl shadow-2xl p-8 max-w-md w-full text-center">
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <FileText className="w-8 h-8 text-red-600" />
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-3">Data Not Found</h2>
+          <p className="text-gray-600 mb-6">{error}</p>
+          <p className="text-sm text-gray-500 mb-6">Redirecting to home in 3 seconds...</p>
+          <button
+            onClick={onHome}
+            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-md"
+          >
+            Go to Home Now
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   if (!resumeData || !customization) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -160,11 +205,10 @@ const DownloadPage: React.FC<DownloadPageProps> = ({ onHome }) => {
                 <button
                   onClick={() => handleDownload(id, name)}
                   disabled={downloadingTemplate === id}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
-                    downloadedTemplates.has(id)
-                      ? 'bg-green-100 text-green-700'
-                      : 'bg-blue-600 text-white hover:bg-blue-700'
-                  } ${downloadingTemplate === id ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${downloadedTemplates.has(id)
+                    ? 'bg-green-100 text-green-700'
+                    : 'bg-blue-600 text-white hover:bg-blue-700'
+                    } ${downloadingTemplate === id ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   {downloadingTemplate === id ? (
                     <>

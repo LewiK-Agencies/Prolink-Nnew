@@ -20,13 +20,35 @@ const PreviewPage: React.FC<PreviewPageProps> = ({ onBack, onProceedToPayment })
     fontFamily: FONT_OPTIONS[0].value
   });
   const [showColorPicker, setShowColorPicker] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    console.log('PreviewPage: Loading resume data from localStorage');
     const data = loadResumeData();
     const savedCustomization = loadCustomization();
-    if (data) setResumeData(data);
-    if (savedCustomization) setCustomization(savedCustomization);
-  }, []);
+
+    console.log('PreviewPage: Data check', {
+      hasResumeData: !!data,
+      hasCustomization: !!savedCustomization,
+      resumeDataKeys: data ? Object.keys(data) : []
+    });
+
+    if (!data) {
+      console.error('PreviewPage: No resume data found!');
+      setError('No resume data found. Please fill out the form first.');
+      // Redirect back to form after 2 seconds
+      setTimeout(() => {
+        console.log('PreviewPage: Redirecting to form due to missing data');
+        onBack();
+      }, 2000);
+    } else {
+      console.log('PreviewPage: Data loaded successfully');
+      setResumeData(data);
+      if (savedCustomization) {
+        setCustomization(savedCustomization);
+      }
+    }
+  }, [onBack]);
 
   const handleCustomizationChange = (updates: Partial<ResumeCustomization>) => {
     const newCustomization = { ...customization, ...updates };
@@ -64,6 +86,27 @@ const PreviewPage: React.FC<PreviewPageProps> = ({ onBack, onProceedToPayment })
     { id: 'minimal', name: 'Minimal' }
   ];
 
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="bg-white rounded-xl shadow-2xl p-8 max-w-md w-full text-center">
+          <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <ArrowLeft className="w-8 h-8 text-yellow-600" />
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-3">No Data Found</h2>
+          <p className="text-gray-600 mb-6">{error}</p>
+          <p className="text-sm text-gray-500 mb-6">Redirecting to form in 2 seconds...</p>
+          <button
+            onClick={onBack}
+            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-md"
+          >
+            Go to Form Now
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   if (!resumeData) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -91,11 +134,10 @@ const PreviewPage: React.FC<PreviewPageProps> = ({ onBack, onProceedToPayment })
                   <button
                     key={template.id}
                     onClick={() => handleCustomizationChange({ template: template.id as any })}
-                    className={`px-4 py-2 rounded-lg font-medium whitespace-nowrap transition-colors ${
-                      customization.template === template.id
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    }`}
+                    className={`px-4 py-2 rounded-lg font-medium whitespace-nowrap transition-colors ${customization.template === template.id
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
                   >
                     {template.name}
                   </button>
@@ -120,9 +162,8 @@ const PreviewPage: React.FC<PreviewPageProps> = ({ onBack, onProceedToPayment })
                           <button
                             key={color}
                             onClick={() => handleCustomizationChange({ primaryColor: color })}
-                            className={`w-12 h-12 rounded-lg transition-all ${
-                              customization.primaryColor === color ? 'ring-2 ring-offset-2 ring-gray-400' : ''
-                            }`}
+                            className={`w-12 h-12 rounded-lg transition-all ${customization.primaryColor === color ? 'ring-2 ring-offset-2 ring-gray-400' : ''
+                              }`}
                             style={{ backgroundColor: color }}
                           />
                         ))}

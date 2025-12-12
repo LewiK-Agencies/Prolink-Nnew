@@ -179,7 +179,14 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ onComplete }) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('ResumeForm: Saving resume data to localStorage', {
+      hasPersonalInfo: !!formData.personalInfo,
+      hasWorkExperience: formData.workExperience.length > 0,
+      hasEducation: formData.education.length > 0,
+      dataKeys: Object.keys(formData)
+    });
     saveResumeData(formData);
+    console.log('ResumeForm: Data saved successfully, proceeding to preview');
     onComplete();
   };
 
