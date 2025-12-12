@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react';
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  mode: 'production',
   plugins: [react()],
   optimizeDeps: {
     exclude: ['lucide-react'],
@@ -24,5 +25,25 @@ export default defineConfig({
   base: '/',
   build: {
     assetsDir: 'assets',
+    minify: 'terser',
+    sourcemap: false,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'react-vendor': ['react', 'react-dom'],
+          'pdf-vendor': ['html2pdf.js'],
+        },
+      },
+    },
+    chunkSizeWarningLimit: 1000,
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        drop_debugger: true,
+      },
+    },
+  },
+  define: {
+    'process.env.NODE_ENV': JSON.stringify('production'),
   },
 });

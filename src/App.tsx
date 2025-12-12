@@ -4,7 +4,7 @@ import ResumeForm from './components/ResumeForm';
 import PreviewPage from './components/PreviewPage';
 import PaymentPage from './components/PaymentPage';
 import DownloadPage from './components/DownloadPage';
-import { hasCompletedPayment, setPaymentCompleted, getCheckoutToken, loadResumeData, loadCustomization } from './utils/storage';
+import { hasCompletedPayment, setPaymentCompleted, validateDownloadToken, loadResumeData, loadCustomization } from './utils/storage';
 
 type AppPage = 'home' | 'form' | 'preview' | 'payment' | 'download';
 
@@ -13,40 +13,53 @@ function App() {
   const [paymentError, setPaymentError] = useState<string | null>(null);
 
   useEffect(() => {
+    // Check if we're on the /download route
+    const path = window.location.pathname;
     const urlParams = new URLSearchParams(window.location.search);
-    const paymentStatus = urlParams.get('payment');
     const token = urlParams.get('token');
 
-    if (paymentStatus === 'success' && token) {
-      // Validate token and check if resume data exists
-      const storedToken = getCheckoutToken();
+    console.log('App: Route check', { path, token });
+
+    if (path === '/download' || path === '/download/') {
+      // User is trying to access download page
+      if (!token) {
+        console.error('App: No token provided in URL, redirecting to home');
+        setPaymentError('Access denied. Please complete payment first.');
+        setCurrentPage('home');
+        window.history.replaceState({}, '', '/');
+        return;
+      }
+
+      // Validate the token from cookie
+      const isValidToken = validateDownloadToken(token);
       const resumeData = loadResumeData();
       const customization = loadCustomization();
 
-      console.log('Payment validation:', {
-        tokenMatch: storedToken === token,
+      console.log('App: Download page validation', {
+        isValidToken,
         hasResumeData: !!resumeData,
         hasCustomization: !!customization
       });
 
-      if (storedToken === token && resumeData && customization) {
-        // Valid payment with data - set completed and go to download
-        console.log('Payment validated successfully, redirecting to download page');
+      if (isValidToken && resumeData && customization) {
+        // Valid token and data exists - allow access to download page
+        console.log('App: Valid token and data, showing download page');
         setPaymentCompleted();
         setCurrentPage('download');
-        window.history.replaceState({}, '', window.location.pathname);
-      } else if (storedToken === token && (!resumeData || !customization)) {
+        // Clean up URL but keep the route
+        window.history.replaceState({}, '', '/download');
+      } else if (isValidToken && (!resumeData || !customization)) {
         // Valid token but missing data
-        console.error('Payment successful but resume data is missing');
-        setPaymentError('Payment successful but resume data is missing. Please create your resume again.');
+        console.error('App: Valid token but missing resume data');
+        setPaymentError('Resume data not found. Please create your resume again.');
         setCurrentPage('form');
-        window.history.replaceState({}, '', window.location.pathname);
+        window.history.replaceState({}, '', '/');
       } else {
         // Invalid token
-        console.error('Invalid payment token');
-        setPaymentError('Invalid payment parameters. Please try again.');
+        console.error('App: Invalid token');
+        setPaymentError('Invalid access token. Please complete payment again.');
         setCurrentPage('home');
-        window.history.replaceState({}, '', window.location.pathname);
+        window.history.replaceState({}, '', '/');
       }
     }
   }, []);

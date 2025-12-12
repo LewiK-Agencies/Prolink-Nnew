@@ -1,9 +1,6 @@
 import React, { useEffect } from 'react';
 import { CreditCard, ArrowLeft, Shield, CheckCircle } from 'lucide-react';
-import { generateCheckoutToken, setCheckoutState } from '../utils/storage';
-
-// Domain constant for easy changes
-
+import { generateDownloadToken, setPaymentCompleted } from '../utils/storage';
 
 interface PaymentPageProps {
   onBack: () => void;
@@ -26,14 +23,16 @@ const PaymentPage: React.FC<PaymentPageProps> = ({ onBack }) => {
     // Initialize PayHero immediately when page loads
     const initializePayHero = () => {
       if (typeof window.PayHero !== 'undefined') {
-        
-        // Generate our own token and set checkout state
-        const token = generateCheckoutToken();
-        setCheckoutState('initiated');
-        
-        
+
+        // Generate secure token and store in cookie
+        const token = generateDownloadToken();
+        console.log('PaymentPage: Generated download token:', token);
+
         const amount = 1; // 1 KES for resume templates
-        const DOMAIN = 'https://prolink.cv';
+
+        // Get the current origin for redirect URLs
+        const origin = window.location.origin;
+
         const config = {
           paymentUrl: "https://app.payhero.co.ke/lipwa/1898",
           width: "100%",
@@ -46,29 +45,34 @@ const PaymentPage: React.FC<PaymentPageProps> = ({ onBack }) => {
           reference: "CV payments",
           buttonName: `Pay Now KES ${amount}`,
           buttonColor: "#2563eb", // Blue color to match the app theme
-          successUrl: `${DOMAIN}/?payment=success&token=${token}`,
-          failedUrl: DOMAIN,
+          successUrl: `${origin}/download?token=${token}`,
+          failedUrl: origin,
           callbackUrl: null
         };
 
-        
+        console.log('PaymentPage: PayHero config:', {
+          successUrl: config.successUrl,
+          token: token
+        });
+
         // Wait for the container to be rendered, then initialize PayHero
         setTimeout(() => {
           const container = document.getElementById('payHero');
           if (container) {
-            
+
             // Initialize PayHero with the correct parameters
             window.PayHero.init(config);
 
             // Listen for payment events
-            window.addEventListener('message', function(event) {
+            window.addEventListener('message', function (event) {
               // Filter out React DevTools messages
               if (event.data.source && event.data.source.includes('react-devtools')) {
                 return;
               }
-              
+
               if (event.data.paymentSuccess) {
-                setCheckoutState('completed');
+                console.log('PaymentPage: Payment success event received');
+                setPaymentCompleted();
                 // Redirect will be handled by successUrl
               }
             });
@@ -80,7 +84,7 @@ const PaymentPage: React.FC<PaymentPageProps> = ({ onBack }) => {
         setTimeout(initializePayHero, 1000);
       }
     };
-    
+
     initializePayHero();
   }, []);
 

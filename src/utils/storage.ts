@@ -1,10 +1,10 @@
 import { ResumeData, ResumeCustomization } from '../types/resume';
+import { setCookie, getCookie, deleteCookie, generateSecureToken } from './cookies';
 
 const RESUME_DATA_KEY = 'resumeBuilderData';
 const CUSTOMIZATION_KEY = 'resumeCustomization';
 const PAYMENT_STATUS_KEY = 'paymentCompleted';
-const CHECKOUT_TOKEN_KEY = 'checkoutToken';
-const CHECKOUT_STATE_KEY = 'checkoutState';
+const DOWNLOAD_TOKEN_COOKIE = 'download_token';
 
 export const saveResumeData = (data: ResumeData): void => {
   try {
@@ -54,32 +54,27 @@ export const clearPaymentStatus = (): void => {
   localStorage.removeItem(PAYMENT_STATUS_KEY);
 };
 
-// Checkout token management
-export const generateCheckoutToken = (): string => {
-  const token = 'checkout_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-  localStorage.setItem(CHECKOUT_TOKEN_KEY, token);
+// Secure token management using cookies
+export const generateDownloadToken = (): string => {
+  const token = generateSecureToken();
+  // Store token in secure cookie (7 days expiry)
+  setCookie(DOWNLOAD_TOKEN_COOKIE, token, 7);
+  console.log('Generated and stored download token in secure cookie:', token);
   return token;
 };
 
-export const getCheckoutToken = (): string | null => {
-  return localStorage.getItem(CHECKOUT_TOKEN_KEY);
+export const getDownloadToken = (): string | null => {
+  return getCookie(DOWNLOAD_TOKEN_COOKIE);
 };
 
-export const clearCheckoutToken = (): void => {
-  localStorage.removeItem(CHECKOUT_TOKEN_KEY);
+export const validateDownloadToken = (token: string): boolean => {
+  const storedToken = getDownloadToken();
+  console.log('Validating token:', { provided: token, stored: storedToken, match: storedToken === token });
+  return storedToken === token;
 };
 
-// Checkout state management
-export const setCheckoutState = (state: 'initiated' | 'completed'): void => {
-  localStorage.setItem(CHECKOUT_STATE_KEY, state);
-};
-
-export const getCheckoutState = (): string | null => {
-  return localStorage.getItem(CHECKOUT_STATE_KEY);
-};
-
-export const clearCheckoutState = (): void => {
-  localStorage.removeItem(CHECKOUT_STATE_KEY);
+export const clearDownloadToken = (): void => {
+  deleteCookie(DOWNLOAD_TOKEN_COOKIE);
 };
 
 // Clear all data after successful download
@@ -87,6 +82,5 @@ export const clearAllData = (): void => {
   localStorage.removeItem(RESUME_DATA_KEY);
   localStorage.removeItem(CUSTOMIZATION_KEY);
   localStorage.removeItem(PAYMENT_STATUS_KEY);
-  localStorage.removeItem(CHECKOUT_TOKEN_KEY);
-  localStorage.removeItem(CHECKOUT_STATE_KEY);
+  clearDownloadToken();
 };
